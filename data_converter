@@ -2,14 +2,15 @@
 if(!defined('BASEPATH'))
 	exit('No direct script access allowed');
 
-/* ------------------------------------------------------------------------
- * DATA CONVERT library
- * ------------------------------------------------------------------------
- * ------------------------------------------------------------------------
- * Fernando Wobeto
- * @author Fernando Wobeto <fernandowobeto@gmail.com>
- * @copyright Copyright (c) 2014
- * ------------------------------------------------------------------------
+/**
+ * CodeIgniter
+ *
+ * An open source application development framework for PHP 5.1.6 or newer
+ *
+ * @package		CodeIgniter
+ * @author		Fernando Wobeto
+ * @copyright	Copyright (c) 2014
+ * @link		http://www.fernandowobeto.com
  */
 
 class Data_converter{
@@ -17,7 +18,7 @@ class Data_converter{
 	private $form_data;
 	private $form_data_new = array();
 	private $model_validate;
-	private $need_convertion = array('numeric','date','integer','boolean','cpf','cnpj','timestamp');
+	private $need_convertion = array('numeric','date','integer','boolean','timestamp');
 
 	public function set_data(Array $form_data){
 		$this->form_data		= $form_data;
@@ -68,20 +69,6 @@ class Data_converter{
 			$value = NULL;
 		}
 		return $value;
-	}
-
-	private function cpf($value){
-		if(strlen($value)){
-			$value = preg_replace('/[^0-9]/', '', $value);
-			return $value;
-		}elseif($value==''){
-			$value = NULL;
-		}
-		return $value;
-	}
-
-	private function cnpj($value){
-		return $this->cpf($value);
 	}
 
 	private function decimal($value){
@@ -143,4 +130,4 @@ class Data_converter{
 }
 
 /* End of file form_data_convert.php */
-/* Location: ./application/libraries/sg/form_data_convert.php */
+/* Location: ./application/libraries/sg/data_converter.php */
