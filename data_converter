@@ -1,0 +1,146 @@
+<?php
+if(!defined('BASEPATH'))
+	exit('No direct script access allowed');
+
+/* ------------------------------------------------------------------------
+ * DATA CONVERT library
+ * ------------------------------------------------------------------------
+ * ------------------------------------------------------------------------
+ * Fernando Wobeto
+ * @author Fernando Wobeto <fernandowobeto@gmail.com>
+ * @copyright Copyright (c) 2014
+ * ------------------------------------------------------------------------
+ */
+
+class Data_converter{
+
+	private $form_data;
+	private $form_data_new = array();
+	private $model_validate;
+	private $need_convertion = array('numeric','date','integer','boolean','cpf','cnpj','timestamp');
+
+	public function set_data(Array $form_data){
+		$this->form_data		= $form_data;
+		$this->form_data_new = $this->form_data;
+	}
+
+	public function set_validate(Array $model_validate){
+		$this->model_validate	= $model_validate;
+	}
+
+	public function convert(){
+		if(!isset($this->form_data)){
+			exit('no form data defined');
+		}
+		if(!isset($this->model_validate)){
+			exit('no model rules defined');
+		}
+		foreach($this->form_data AS $field=>$value){
+			$field_type = isset($this->model_validate[$field]['rules']['type'])?$this->model_validate[$field]['rules']['type']:false;
+
+			//existe chave type no rules
+			if($field_type){
+				//se for um tipo que necessita de conversão
+				if(in_array($field_type,$this->need_convertion)){
+					$new_value = $this->$field_type(trim($value));
+				}else{
+					if(!is_array($value)):
+						$value = trim($value);
+					endif;
+					$new_value = $value;
+				}
+			}else{
+				if(!is_array($value)):
+					$value = trim($value);
+				endif;
+				$new_value = $value;
+			}
+			$this->form_data_new[$field] = $new_value?$new_value:NULL;
+		}
+		return $this->form_data_new;
+	}
+
+	private function numeric($value){
+		if(strlen($value)){
+			$value = number_to_us($value,$value);
+			return $value;
+		}elseif($value==''){
+			$value = NULL;
+		}
+		return $value;
+	}
+
+	private function cpf($value){
+		if(strlen($value)){
+			$value = preg_replace('/[^0-9]/', '', $value);
+			return $value;
+		}elseif($value==''){
+			$value = NULL;
+		}
+		return $value;
+	}
+
+	private function cnpj($value){
+		return $this->cpf($value);
+	}
+
+	private function decimal($value){
+		return $this->numeric($value);
+	}
+
+	private function trim($value){
+		return trim($value);
+	}
+
+	private function date($value){
+		if(strlen($value)){
+			$value = date_to_us($value,$value);
+			return $value;
+		}elseif($value==''){
+			$value = NULL;
+		}
+		return $value;
+	}
+
+	private function integer($value){
+		if($value == ''){
+			return NULL;
+		}
+		return $value;
+	}
+
+	private function bigint($value){
+		return $this->integer($value);
+	}
+
+	private function timestamp($value){
+		$test = preg_match('/^(\d{2})\/(\d{2})\/(\d{4})\s(\d{2})\:(\d{2})\:(\d{2})$/',$value);
+		if($test){
+			list($data,$hora) = explode(' ',$value);
+
+			$data_us = date_to_us($data);
+
+			if(!is_null($data_us)){
+				$data = $data_us;
+			}
+			$value = "$data $hora";
+
+		}
+		return $value;
+	}
+
+	private function boolean($value){
+		$value = strtoupper($value);
+
+		if(in_array($value,array('TRUE','T','ON'))){
+			return 'TRUE';
+		}elseif(in_array($value,array('FALSE','F','OFF'))){
+			return 'FALSE';
+		}
+		return NULL;
+	}
+
+}
+
+/* End of file form_data_convert.php */
+/* Location: ./application/libraries/sg/form_data_convert.php */
